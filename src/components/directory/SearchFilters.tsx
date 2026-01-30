@@ -2,88 +2,83 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
+// BORRAMOS LA IMPORTACIÓN DE "use-debounce" QUE CAUSABA EL ERROR
 
-// VERSIÓN CORREGIDA: Sin librerías externas para evitar errores de build
 export const SearchFilters = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // Estados locales para el texto y la categoría
-  const [text, setText] = useState(searchParams.get("q") || "");
-  const [category, setCategory] = useState(searchParams.get("category") || "");
-  
-  // Estado para el texto "retrasado" (debounce manual)
-  const [debouncedText, setDebouncedText] = useState(text);
+  // Leemos la URL actual para mantener el estado si recargas
+  const initialQuery = searchParams.get("q") || "";
+  const initialCategory = searchParams.get("category") || "";
 
-  // EFECTO 1: Debounce manual (espera 500ms antes de actualizar la búsqueda)
+  const [text, setText] = useState(initialQuery);
+  const [category, setCategory] = useState(initialCategory);
+
+  // Categorías fijas (Mismas del registro)
+  const categories = ["Alimentos", "Comercio", "Servicios", "Salud", "Automotriz"];
+
+  // Efecto: Cuando cambia el texto o categoría, actualizamos la URL
   useEffect(() => {
+    // Creamos un timer para no recargar en cada letra (Debounce de 500ms)
     const timer = setTimeout(() => {
-      setDebouncedText(text);
+      // Creamos los parámetros basándonos en el estado actual
+      const params = new URLSearchParams();
+      
+      if (text) params.set("q", text);
+      if (category) params.set("category", category);
+      
+      // Empujamos la nueva URL
+      router.push(`/directorio?${params.toString()}`);
     }, 500);
 
-    // Si el usuario sigue escribiendo, limpiamos el reloj anterior
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [text]);
-
-  // EFECTO 2: Actualizar la URL cuando cambian los filtros
-  useEffect(() => {
-    // Creamos una copia de los parámetros actuales
-    const params = new URLSearchParams(searchParams.toString());
-    
-    // Actualizamos o borramos la búsqueda
-    if (debouncedText) {
-      params.set("q", debouncedText);
-    } else {
-      params.delete("q");
-    }
-
-    // Actualizamos o borramos la categoría
-    if (category && category !== "Todas") {
-      params.set("category", category);
-    } else {
-      params.delete("category");
-    }
-
-    // Empujamos la nueva URL sin recargar la página
-    router.push(`/directorio?${params.toString()}`);
-  }, [debouncedText, category, router, searchParams]);
-
-  const categories = ["Todas", "Alimentos", "Servicios", "Tecnología", "Salud", "Ropa", "Hogar", "Automotriz"];
+    // Limpiamos el timer si el usuario sigue escribiendo rápido
+    return () => clearTimeout(timer);
+  }, [text, category, router]);
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 max-w-2xl mx-auto">
-      {/* Buscador de Texto */}
-      <div className="relative flex-1">
+    <div className="space-y-6 mb-10">
+      
+      {/* 1. Buscador Principal */}
+      <div className="relative max-w-2xl mx-auto">
         <input
           type="text"
-          placeholder="¿Qué buscas? (ej. tacos, dentista...)"
-          className="w-full pl-10 pr-4 py-3 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-mc-orange focus:border-transparent shadow-sm text-mc-dark placeholder-gray-400"
+          placeholder="¿Qué estás buscando hoy? (Ej. Tacos, Dentista...)"
           value={text}
           onChange={(e) => setText(e.target.value)}
+          className="w-full pl-12 pr-4 py-4 rounded-full border-2 border-gray-100 shadow-lg shadow-gray-200/50 text-lg outline-none focus:border-mc-orange focus:ring-4 focus:ring-orange-100 transition-all text-mc-dark"
         />
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        </div>
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-gray-400">
+          🔍
+        </span>
       </div>
 
-      {/* Selector de Categoría */}
-      <div className="relative md:w-48">
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-full pl-4 pr-10 py-3 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-mc-orange focus:border-transparent shadow-sm appearance-none bg-white cursor-pointer text-mc-dark"
+      {/* 2. Filtros de Categoría */}
+      <div className="flex flex-wrap justify-center gap-2">
+        <button
+          onClick={() => setCategory("")}
+          className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
+            category === ""
+              ? "bg-mc-dark text-white scale-105 shadow-md"
+              : "bg-white text-gray-500 border border-gray-200 hover:border-mc-orange"
+          }`}
         >
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-        </div>
+          Todas
+        </button>
+        
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setCategory(cat === category ? "" : cat)}
+            className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
+              category === cat
+                ? "bg-mc-orange text-white scale-105 shadow-md"
+                : "bg-white text-gray-500 border border-gray-200 hover:border-mc-orange"
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
       </div>
     </div>
   );
