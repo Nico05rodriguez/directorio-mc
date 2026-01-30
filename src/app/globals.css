@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  /* Paleta de colores MC */
+  --color-mc-orange: #FF8200;
+  --color-mc-dark: #1A1A1A;
+  --color-mc-gray: #F3F4F6;
+  --color-mc-glass: rgba(255, 255, 255, 0.7);
+
+  /* Efectos */
+  --shadow-glass: 0 4px 30px rgba(0, 0, 0, 0.1);
+  --backdrop-blur-xs: 2px;
+}
+
+/* Estilos globales */
+body {
+  background-color: var(--color-mc-gray); /* Fondo gris claro */
+  color: var(--color-mc-dark);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+html {
+  scroll-behavior: smooth;
+}
