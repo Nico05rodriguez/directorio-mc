@@ -119,3 +119,6 @@ export default async function DirectorioPage({
     </div>
   );
 }
+
+
+// Forzando actualización para Vercel
