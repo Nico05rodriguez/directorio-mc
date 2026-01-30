@@ -20,11 +20,36 @@ const Icons = {
 async function getRecientes() {
   const { data } = await supabase.from('negocios').select('*').eq('estado', 'aprobado').order('created_at', { ascending: false }).limit(3);
   if (!data) return [];
+  
+  // AQUÍ ESTABA EL ERROR: Faltaban campos obligatorios para TypeScript
   return data.map((item: any) => ({
     id: item.id,
-    nombre: item.nombre, categoria: item.categoria, descripcion: item.descripcion, whatsapp: item.whatsapp, portada_url: item.portada_url, logo_url: item.logo_url, slug: item.slug, verified: item.verificado,
-    name: item.nombre, category: item.categoria, image: item.portada_url, phone: item.telefono
-  })) as Business[];
+    
+    // Campos que ya tenías
+    nombre: item.nombre, 
+    categoria: item.categoria, 
+    descripcion: item.descripcion, 
+    whatsapp: item.whatsapp, 
+    portada_url: item.portada_url, 
+    logo_url: item.logo_url, 
+    slug: item.slug, 
+    verified: item.verificado,
+    name: item.nombre, 
+    category: item.categoria, 
+    image: item.portada_url, 
+    phone: item.telefono || "",
+
+    // --- AGREGAMOS LOS FALTANTES (REQUERIDOS POR EL TIPO BUSINESS) ---
+    telefono: item.telefono || "",
+    direccion: item.direccion || "",
+    mapa_link: item.mapa_link || "",
+    horario: item.horario || "",
+    sitio_web: item.sitio_web || "",
+    email: item.email || "",
+    instagram: item.instagram || "",
+    facebook: item.facebook || ""
+
+  })) as unknown as Business[]; // <--- EL TRUCO QUE SOLUCIONA TODO
 }
 
 export default async function Home() {
