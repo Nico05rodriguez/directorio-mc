@@ -2,40 +2,49 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-// Sin librerías externas para evitar errores
 
 export const SearchFilters = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // Leemos la URL actual
   const initialQuery = searchParams.get("q") || "";
   const initialCategory = searchParams.get("category") || "";
 
+  // Estado inmediato (lo que ves al escribir)
   const [text, setText] = useState(initialQuery);
+  // Estado para la URL (se actualiza solo al hacer clic o esperar)
   const [category, setCategory] = useState(initialCategory);
+  
+  // Estado "reposado" solo para el texto (para el debounce)
+  const [debouncedText, setDebouncedText] = useState(initialQuery);
 
-  // Categorías fijas
   const categories = ["Alimentos", "Comercio", "Servicios", "Salud", "Automotriz"];
 
-  // Efecto: Actualizar URL cuando cambian los filtros (con espera de 500ms)
+  // EFECTO 1: El "Reloj" (Solo para el texto)
+  // Espera 300ms después de que dejas de escribir para confirmar el texto
   useEffect(() => {
     const timer = setTimeout(() => {
-      const params = new URLSearchParams();
-      
-      if (text) params.set("q", text);
-      if (category) params.set("category", category);
-      
-      router.push(`/directorio?${params.toString()}`);
-    }, 500);
+      setDebouncedText(text);
+    }, 300); // 300ms es más ágil que 500ms
 
     return () => clearTimeout(timer);
-  }, [text, category, router]);
+  }, [text]);
+
+  // EFECTO 2: El "Navegador" (Actualiza la URL)
+  // Se dispara INMEDIATAMENTE si cambia la categoría, o cuando el texto "reposa"
+  useEffect(() => {
+    const params = new URLSearchParams();
+    
+    if (debouncedText) params.set("q", debouncedText);
+    if (category) params.set("category", category);
+    
+    router.push(`/directorio?${params.toString()}`);
+  }, [debouncedText, category, router]);
 
   return (
     <div className="space-y-6 mb-10">
       
-      {/* 1. Buscador Principal (Tu diseño original) */}
+      {/* 1. Buscador Principal */}
       <div className="relative max-w-2xl mx-auto">
         <input
           type="text"
@@ -49,7 +58,7 @@ export const SearchFilters = () => {
         </span>
       </div>
 
-      {/* 2. Filtros de Categoría (Botones debajo, no lista) */}
+      {/* 2. Filtros de Categoría */}
       <div className="flex flex-wrap justify-center gap-2">
         <button
           onClick={() => setCategory("")}
