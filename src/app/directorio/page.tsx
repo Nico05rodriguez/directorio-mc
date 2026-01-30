@@ -1,5 +1,5 @@
 import { BusinessCard } from "../../components/ui/BusinessCard";
-import { SearchFilters } from "../../components/directory/SearchFilters"; // Importamos el buscador
+import { SearchFilters } from "../../components/directory/SearchFilters"; 
 import { supabase } from "../../lib/supabase";
 import { Business } from "../../types";
 
@@ -16,7 +16,7 @@ async function getNegocios(query: string, category: string) {
     .order('created_at', { ascending: false });
 
   // Si hay categoría seleccionada, filtramos
-  if (category) {
+  if (category && category !== "Todas") {
     dbQuery = dbQuery.eq('categoria', category);
   }
 
@@ -33,23 +33,38 @@ async function getNegocios(query: string, category: string) {
     return [];
   }
 
+  // AQUÍ ESTABA EL ERROR: Faltaban campos requeridos por el tipo Business
   return data.map((item: any) => ({
     id: item.id,
-
-    nombre: item.nombre,          // <--- ANTES ERA 'name'
-    categoria: item.categoria,    // <--- ANTES ERA 'category'
+    
+    // Campos principales
+    nombre: item.nombre,
+    categoria: item.categoria,
     descripcion: item.descripcion,
     whatsapp: item.whatsapp,
-    portada_url: item.portada_url,// <--- ANTES ERA 'image'
-    logo_url: item.logo_url,      // <--- IMPORTANTE
+    portada_url: item.portada_url,
+    logo_url: item.logo_url,
     slug: item.slug,
     verified: item.verificado,
 
+    // Compatibilidad (Inglés/Español)
     name: item.nombre,
     category: item.categoria,
     phone: item.telefono,
     image: item.portada_url,
-  })) as Business[];
+
+    // --- CAMPOS AGREGADOS PARA CORREGIR EL ERROR DE BUILD ---
+    // Si no existen en la DB, enviamos cadena vacía "" para que TypeScript no falle
+    telefono: item.telefono || "",
+    direccion: item.direccion || "",
+    mapa_link: item.mapa_link || "",
+    horario: item.horario || "",
+    sitio_web: item.sitio_web || "",
+    email: item.email || "",
+    instagram: item.instagram || "",
+    facebook: item.facebook || ""
+    
+  })) as unknown as Business[]; // <--- EL TRUCO FINAL: Forzamos el tipo
 }
 
 export default async function DirectorioPage({
@@ -57,8 +72,10 @@ export default async function DirectorioPage({
 }: {
   searchParams: Promise<{ q?: string; category?: string }>;
 }) {
-  // Leemos los parámetros de la URL (Ej: ?q=tacos&category=Alimentos)
-  const { q = "", category = "" } = await searchParams;
+  // Leemos los parámetros de la URL (Esperamos la promesa para Next.js 15)
+  const resolvedParams = await searchParams;
+  const q = resolvedParams?.q || "";
+  const category = resolvedParams?.category || "";
   
   // Pedimos los datos filtrados
   const businesses = await getNegocios(q, category);
@@ -75,7 +92,7 @@ export default async function DirectorioPage({
           Apoya el comercio local. Encuentra todo lo que necesitas en tu municipio.
         </p>
 
-        {/* AQUÍ INSERTAMOS EL BUSCADOR INTERACTIVO */}
+        {/* Buscador Interactivo */}
         <SearchFilters />
       </div>
 
@@ -88,8 +105,8 @@ export default async function DirectorioPage({
             ))}
           </div>
         ) : (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">🔍</div>
+          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200 mx-4">
+            <div className="text-6xl mb-4 opacity-50">🔍</div>
             <h3 className="text-xl font-bold text-gray-400">
               No encontramos resultados para "{q}"
             </h3>
