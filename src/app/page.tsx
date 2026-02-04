@@ -8,7 +8,7 @@ import { Business } from "../types";
 
 export const revalidate = 60;
 
-// --- ICONOS SVG (Para sustituir emojis) ---
+// --- ICONOS SVG ---
 const Icons = {
   Search: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>,
   Rocket: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>,
@@ -18,14 +18,14 @@ const Icons = {
 };
 
 async function getRecientes() {
-  const { data } = await supabase.from('negocios').select('*').eq('estado', 'aprobado').order('created_at', { ascending: false }).limit(3);
+  // CAMBIO 1: Aumentamos el límite a 5 para que el carrusel se vea "jugoso"
+  const { data } = await supabase.from('negocios').select('*').eq('estado', 'aprobado').order('created_at', { ascending: false }).limit(5);
   if (!data) return [];
   
-  // AQUÍ ESTABA EL ERROR: Faltaban campos obligatorios para TypeScript
   return data.map((item: any) => ({
     id: item.id,
     
-    // Campos que ya tenías
+    // Campos estándar
     nombre: item.nombre, 
     categoria: item.categoria, 
     descripcion: item.descripcion, 
@@ -39,7 +39,7 @@ async function getRecientes() {
     image: item.portada_url, 
     phone: item.telefono || "",
 
-    // --- AGREGAMOS LOS FALTANTES (REQUERIDOS POR EL TIPO BUSINESS) ---
+    // Campos requeridos por TypeScript (rellenados)
     telefono: item.telefono || "",
     direccion: item.direccion || "",
     mapa_link: item.mapa_link || "",
@@ -49,28 +49,27 @@ async function getRecientes() {
     instagram: item.instagram || "",
     facebook: item.facebook || ""
 
-  })) as unknown as Business[]; // <--- EL TRUCO QUE SOLUCIONA TODO
+  })) as unknown as Business[]; 
 }
 
 export default async function Home() {
   const recientes = await getRecientes();
 
-  // Estilo "Solid Liquid" para móviles
   const mobileBtnBase = "flex-1 text-center py-3.5 px-6 rounded-full font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2 border border-white/40 shadow-xl";
   const darkBtn = `${mobileBtnBase} bg-gradient-to-br from-gray-800 to-black text-white shadow-gray-400/30`;
   const orangeBtn = `${mobileBtnBase} bg-gradient-to-br from-mc-orange to-orange-600 text-white shadow-orange-200`;
 
   return (
-    <div className="flex flex-col gap-12 md:gap-16 bg-white min-h-screen m-3 md:m-6 rounded-[2.5rem] shadow-xl shadow-gray-200/40 overflow-hidden p-6 md:p-10 lg:p-12 pb-16">
+    // CAMBIO 2: Padding ajustado en contenedor principal para móvil
+    <div className="flex flex-col gap-12 md:gap-16 bg-white min-h-screen md:m-6 md:rounded-[2.5rem] shadow-xl shadow-gray-200/40 overflow-hidden pt-6 md:p-10 lg:p-12 pb-16">
       
       <ScrollToTop />
 
       {/* 1. SECCIÓN HERO */}
-      <section className="flex flex-col items-center animate-in fade-in zoom-in duration-700 pt-2">
+      <section className="flex flex-col items-center animate-in fade-in zoom-in duration-700 pt-2 px-6 md:px-0">
         
         <HeroSlider />
 
-        {/* BOTONES MÓVIL (Estilo Liquid Sólido) */}
         <div className="flex lg:hidden flex-wrap justify-center gap-4 w-full mt-6 max-w-xl">
           <Link href="/directorio" className={darkBtn}>
             <Icons.Search /> Explorar
@@ -88,14 +87,14 @@ export default async function Home() {
 
       </section>
 
-      {/* 2. NUEVOS INGRESOS (Sin emoji en título) */}
+      {/* 2. NUEVOS INGRESOS (CARRUSEL MÓVIL / GRID ESCRITORIO) */}
       {recientes.length > 0 && (
-        <section className="p-6 md:p-8 bg-gray-50/80 border border-gray-100 rounded-[2rem]">
+        // CAMBIO 3: 'py-8' en móvil (sin padding lateral) para permitir efecto borde-a-borde
+        <section className="py-8 md:p-8 bg-gray-50/80 border-y md:border border-gray-100 md:rounded-[2rem]">
           <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-8 px-2">
+            <div className="flex items-center justify-between mb-8 px-6 md:px-2">
               <h2 className="text-2xl md:text-3xl font-bold text-mc-dark tracking-tight">Nuevos Ingresos</h2>
               
-              {/* CAMBIO APLICADO: Botón 'Ver todos' mejorado estilo Píldora */}
               <Link 
                 href="/directorio" 
                 className="group flex items-center gap-1 text-xs md:text-sm font-bold text-mc-orange bg-orange-50 hover:bg-mc-orange hover:text-white px-4 py-2 rounded-full transition-all duration-300 shadow-sm"
@@ -105,15 +104,27 @@ export default async function Home() {
               </Link>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {recientes.map((negocio) => (<BusinessCard key={negocio.id} business={negocio} />))}
+            {/* CAMBIO 4: CONTENEDOR HÍBRIDO (FLEX en móvil / GRID en escritorio) */}
+            {/* - flex: Fila horizontal en móvil
+                - overflow-x-auto: Scroll horizontal
+                - snap-x: Efecto imán
+                - px-6: Padding inicial para que la primera tarjeta no quede pegada al borde
+            */}
+            <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory md:snap-none px-6 md:px-0 scrollbar-hide">
+              {recientes.map((negocio) => (
+                // CAMBIO 5: Tarjetas al 85% de ancho en móvil
+                <div key={negocio.id} className="min-w-[85%] md:min-w-0 snap-center shrink-0 first:pl-0 last:pr-6 md:last:pr-0">
+                   <BusinessCard business={negocio} />
+                </div>
+              ))}
             </div>
+
           </div>
         </section>
       )}
 
-      {/* 3. INFO (Conocer más) - ICONOS SVG */}
-      <section id="conocer-mas" className="scroll-mt-32 pt-4 px-2">
+      {/* 3. INFO */}
+      <section id="conocer-mas" className="scroll-mt-32 pt-4 px-6 md:px-2">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-mc-dark mb-6 tracking-tight">¿Qué es Directorio MC?</h2>
           <p className="text-lg text-gray-500 leading-relaxed mx-auto">
