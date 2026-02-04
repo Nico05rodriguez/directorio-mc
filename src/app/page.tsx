@@ -5,7 +5,7 @@ import { HeroSlider } from "../components/ui/HeroSlider";
 import { ScrollToTop } from "../components/ui/ScrollToTop";
 import { supabase } from "../lib/supabase";
 import { Business } from "../types";
-import { CategoryPills } from "../components/ui/CategoryPills"; 
+// Ya NO importamos CategoryPills aquí
 
 export const revalidate = 60;
 
@@ -32,48 +32,30 @@ async function getRecientes() {
 
 export default async function Home() {
   const recientes = await getRecientes();
-
   const mobileBtnBase = "flex-1 text-center py-3.5 px-6 rounded-full font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2 border border-white/40 shadow-xl";
   const darkBtn = `${mobileBtnBase} bg-gradient-to-br from-gray-800 to-black text-white shadow-gray-400/30`;
   const orangeBtn = `${mobileBtnBase} bg-gradient-to-br from-mc-orange to-orange-600 text-white shadow-orange-200`;
 
   return (
     <div className="flex flex-col gap-8 md:gap-16 bg-white min-h-screen md:m-6 md:rounded-[2.5rem] shadow-xl shadow-gray-200/40 overflow-hidden pt-6 md:p-10 lg:p-12 pb-24">
-      
       <ScrollToTop />
-
-      {/* 1. SECCIÓN HERO */}
+      {/* 1. HERO */}
       <section className="flex flex-col items-center animate-in fade-in zoom-in duration-700 pt-2 px-6 md:px-0">
         <HeroSlider />
-        
-        {/* Botones de Acción */}
         <div className="flex lg:hidden flex-wrap justify-center gap-4 w-full mt-6 mb-4 max-w-xl">
-          <Link href="/directorio" className={darkBtn}>
-            <Icons.Search /> Explorar
-          </Link>
-          <Link href="/registro" className={orangeBtn}>
-            <Icons.Rocket /> Registrar
-          </Link>
+          <Link href="/directorio" className={darkBtn}><Icons.Search /> Explorar</Link>
+          <Link href="/registro" className={orangeBtn}><Icons.Rocket /> Registrar</Link>
         </div>
       </section>
 
-      {/* 2. NUEVOS INGRESOS + CATEGORÍAS */}
+      {/* 2. NUEVOS INGRESOS */}
       {recientes.length > 0 && (
         <section className="py-4 md:p-8 bg-gray-50/80 border-y md:border border-gray-100 md:rounded-[2rem]">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center justify-between mb-4 px-6 md:px-2">
               <h2 className="text-xl md:text-3xl font-bold text-mc-dark tracking-tight">Nuevos Ingresos</h2>
-              <Link href="/directorio" className="text-xs font-bold text-mc-orange bg-orange-50 px-3 py-1.5 rounded-full">
-                Ver todos
-              </Link>
+              <Link href="/directorio" className="text-xs font-bold text-mc-orange bg-orange-50 px-3 py-1.5 rounded-full">Ver todos</Link>
             </div>
-
-            {/* AQUI ESTÁN: Burbujas de Categorías dentro de la sección */}
-            <div className="md:hidden mb-2">
-              <CategoryPills />
-            </div>
-            
-            {/* Carrusel de Negocios */}
             <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory md:snap-none px-6 md:px-0 scrollbar-hide">
               {recientes.map((negocio) => (
                 <div key={negocio.id} className="min-w-[85%] md:min-w-0 snap-center shrink-0 first:pl-0 last:pr-6 md:last:pr-0">
@@ -87,41 +69,23 @@ export default async function Home() {
 
       {/* 3. INFO */}
       <section className="px-6 md:px-2 pb-10">
-        <div className="max-w-3xl mx-auto text-center mb-10 mt-8">
+        {/* ... (Todo igual que antes) ... */}
+         <div className="max-w-3xl mx-auto text-center mb-10 mt-8">
           <h2 className="text-2xl md:text-4xl font-bold text-mc-dark mb-4 tracking-tight">Directorio MC</h2>
-          <p className="text-sm md:text-lg text-gray-500 leading-relaxed mx-auto">
-            Conectamos vecinos con emprendedores locales.
-          </p>
+          <p className="text-sm md:text-lg text-gray-500 leading-relaxed mx-auto">Conectamos vecinos con emprendedores locales.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 max-w-7xl mx-auto">
           <GlassCard className="bg-orange-50/40 border-orange-100/50 shadow-sm p-6 flex flex-row md:flex-col items-center gap-4">
-            <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl bg-white text-mc-orange flex items-center justify-center shadow-sm shrink-0">
-               <Icons.MapPin />
-            </div>
-            <div className="text-left md:text-center">
-               <h3 className="text-base font-bold text-mc-dark">Cerca de ti</h3>
-               <p className="text-xs text-gray-500">Comercios en tu zona.</p>
-            </div>
+            <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl bg-white text-mc-orange flex items-center justify-center shadow-sm shrink-0"><Icons.MapPin /></div>
+            <div className="text-left md:text-center"><h3 className="text-base font-bold text-mc-dark">Cerca de ti</h3><p className="text-xs text-gray-500">Comercios en tu zona.</p></div>
           </GlassCard>
-
           <GlassCard className="bg-blue-50/40 border-blue-100/50 shadow-sm p-6 flex flex-row md:flex-col items-center gap-4">
-            <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl bg-white text-blue-500 flex items-center justify-center shadow-sm shrink-0">
-               <Icons.Rocket />
-            </div>
-            <div className="text-left md:text-center">
-               <h3 className="text-base font-bold text-mc-dark">Digital</h3>
-               <p className="text-xs text-gray-500">Tu negocio online.</p>
-            </div>
+            <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl bg-white text-blue-500 flex items-center justify-center shadow-sm shrink-0"><Icons.Rocket /></div>
+            <div className="text-left md:text-center"><h3 className="text-base font-bold text-mc-dark">Digital</h3><p className="text-xs text-gray-500">Tu negocio online.</p></div>
           </GlassCard>
-
           <GlassCard className="bg-green-50/40 border-green-100/50 shadow-sm p-6 flex flex-row md:flex-col items-center gap-4">
-            <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl bg-white text-green-500 flex items-center justify-center shadow-sm shrink-0">
-               <Icons.Handshake />
-            </div>
-            <div className="text-left md:text-center">
-               <h3 className="text-base font-bold text-mc-dark">Comunidad</h3>
-               <p className="text-xs text-gray-500">Apoyo local real.</p>
-            </div>
+            <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl bg-white text-green-500 flex items-center justify-center shadow-sm shrink-0"><Icons.Handshake /></div>
+            <div className="text-left md:text-center"><h3 className="text-base font-bold text-mc-dark">Comunidad</h3><p className="text-xs text-gray-500">Apoyo local real.</p></div>
           </GlassCard>
         </div>
       </section>
