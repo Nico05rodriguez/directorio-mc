@@ -5,6 +5,7 @@ import { HeroSlider } from "../components/ui/HeroSlider";
 import { ScrollToTop } from "../components/ui/ScrollToTop";
 import { supabase } from "../lib/supabase";
 import { Business } from "../types";
+import { CategoryPills } from "../components/ui/CategoryPills"; // Importación correcta
 
 export const revalidate = 60;
 
@@ -18,38 +19,15 @@ const Icons = {
 };
 
 async function getRecientes() {
-  // CAMBIO 1: Aumentamos el límite a 5 para que el carrusel se vea "jugoso"
   const { data } = await supabase.from('negocios').select('*').eq('estado', 'aprobado').order('created_at', { ascending: false }).limit(5);
   if (!data) return [];
   
   return data.map((item: any) => ({
     id: item.id,
-    
-    // Campos estándar
-    nombre: item.nombre, 
-    categoria: item.categoria, 
-    descripcion: item.descripcion, 
-    whatsapp: item.whatsapp, 
-    portada_url: item.portada_url, 
-    logo_url: item.logo_url, 
-    slug: item.slug, 
-    verified: item.verificado,
-    name: item.nombre, 
-    category: item.categoria, 
-    image: item.portada_url, 
-    phone: item.telefono || "",
-
-    // Campos requeridos por TypeScript (rellenados)
-    telefono: item.telefono || "",
-    direccion: item.direccion || "",
-    mapa_link: item.mapa_link || "",
-    horario: item.horario || "",
-    sitio_web: item.sitio_web || "",
-    email: item.email || "",
-    instagram: item.instagram || "",
-    facebook: item.facebook || ""
-
-  })) as unknown as Business[]; 
+    nombre: item.nombre, categoria: item.categoria, descripcion: item.descripcion, whatsapp: item.whatsapp, portada_url: item.portada_url, logo_url: item.logo_url, slug: item.slug, verified: item.verificado,
+    name: item.nombre, category: item.categoria, image: item.portada_url, phone: item.telefono || "",
+    telefono: item.telefono || "", direccion: item.direccion || "", mapa_link: item.mapa_link || "", horario: item.horario || "", sitio_web: item.sitio_web || "", email: item.email || "", instagram: item.instagram || "", facebook: item.facebook || ""
+  })) as unknown as Business[];
 }
 
 export default async function Home() {
@@ -60,17 +38,16 @@ export default async function Home() {
   const orangeBtn = `${mobileBtnBase} bg-gradient-to-br from-mc-orange to-orange-600 text-white shadow-orange-200`;
 
   return (
-    // CAMBIO 2: Padding ajustado en contenedor principal para móvil
-    <div className="flex flex-col gap-12 md:gap-16 bg-white min-h-screen md:m-6 md:rounded-[2.5rem] shadow-xl shadow-gray-200/40 overflow-hidden pt-6 md:p-10 lg:p-12 pb-16">
+    <div className="flex flex-col gap-8 md:gap-16 bg-white min-h-screen md:m-6 md:rounded-[2.5rem] shadow-xl shadow-gray-200/40 overflow-hidden pt-6 md:p-10 lg:p-12 pb-24">
       
       <ScrollToTop />
 
       {/* 1. SECCIÓN HERO */}
       <section className="flex flex-col items-center animate-in fade-in zoom-in duration-700 pt-2 px-6 md:px-0">
-        
         <HeroSlider />
 
-        <div className="flex lg:hidden flex-wrap justify-center gap-4 w-full mt-6 max-w-xl">
+        {/* Botones de Acción (Solo móvil) */}
+        <div className="flex lg:hidden flex-wrap justify-center gap-4 w-full mt-6 mb-8 max-w-xl">
           <Link href="/directorio" className={darkBtn}>
             <Icons.Search /> Explorar
           </Link>
@@ -78,86 +55,74 @@ export default async function Home() {
             <Icons.Rocket /> Registrar
           </Link>
         </div>
-        
-        <div className="lg:hidden mt-6 mb-2">
-           <a href="#conocer-mas" className="text-gray-400 text-sm font-bold border-b border-gray-200 pb-1 hover:text-mc-orange transition-colors flex items-center gap-1">
-             Conocer más <Icons.ArrowDown />
-           </a>
-        </div>
-
       </section>
 
-      {/* 2. NUEVOS INGRESOS (CARRUSEL MÓVIL / GRID ESCRITORIO) */}
+      {/* --- AQUÍ ESTÁ EL CAMBIO: BURBUJAS DE CATEGORÍAS --- */}
+      {/* Solo visible en móvil (md:hidden) */}
+      <div className="md:hidden">
+        <CategoryPills />
+      </div>
+
+      {/* 2. NUEVOS INGRESOS */}
       {recientes.length > 0 && (
-        // CAMBIO 3: 'py-8' en móvil (sin padding lateral) para permitir efecto borde-a-borde
-        <section className="py-8 md:p-8 bg-gray-50/80 border-y md:border border-gray-100 md:rounded-[2rem]">
+        <section className="py-4 md:p-8 bg-gray-50/80 border-y md:border border-gray-100 md:rounded-[2rem]">
           <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-8 px-6 md:px-2">
-              <h2 className="text-2xl md:text-3xl font-bold text-mc-dark tracking-tight">Nuevos Ingresos</h2>
-              
-              <Link 
-                href="/directorio" 
-                className="group flex items-center gap-1 text-xs md:text-sm font-bold text-mc-orange bg-orange-50 hover:bg-mc-orange hover:text-white px-4 py-2 rounded-full transition-all duration-300 shadow-sm"
-              >
+            <div className="flex items-center justify-between mb-6 px-6 md:px-2">
+              <h2 className="text-xl md:text-3xl font-bold text-mc-dark tracking-tight">Nuevos Ingresos</h2>
+              <Link href="/directorio" className="text-xs font-bold text-mc-orange bg-orange-50 px-3 py-1.5 rounded-full">
                 Ver todos
-                <span className="group-hover:translate-x-1 transition-transform">→</span>
               </Link>
             </div>
             
-            {/* CAMBIO 4: CONTENEDOR HÍBRIDO (FLEX en móvil / GRID en escritorio) */}
-            {/* - flex: Fila horizontal en móvil
-                - overflow-x-auto: Scroll horizontal
-                - snap-x: Efecto imán
-                - px-6: Padding inicial para que la primera tarjeta no quede pegada al borde
-            */}
             <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory md:snap-none px-6 md:px-0 scrollbar-hide">
               {recientes.map((negocio) => (
-                // CAMBIO 5: Tarjetas al 85% de ancho en móvil
                 <div key={negocio.id} className="min-w-[85%] md:min-w-0 snap-center shrink-0 first:pl-0 last:pr-6 md:last:pr-0">
                    <BusinessCard business={negocio} />
                 </div>
               ))}
             </div>
-
           </div>
         </section>
       )}
 
       {/* 3. INFO */}
-      <section id="conocer-mas" className="scroll-mt-32 pt-4 px-6 md:px-2">
-        <div className="max-w-3xl mx-auto text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-mc-dark mb-6 tracking-tight">¿Qué es Directorio MC?</h2>
-          <p className="text-lg text-gray-500 leading-relaxed mx-auto">
-            Un espacio moderno diseñado para conectar a los ciudadanos con los negocios locales.
-            Fomentamos el consumo local para fortalecer la economía.
+      <section className="px-6 md:px-2 pb-10">
+        <div className="max-w-3xl mx-auto text-center mb-10 mt-8">
+          <h2 className="text-2xl md:text-4xl font-bold text-mc-dark mb-4 tracking-tight">Directorio MC</h2>
+          <p className="text-sm md:text-lg text-gray-500 leading-relaxed mx-auto">
+            Conectamos vecinos con emprendedores locales.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          
-          <GlassCard className="bg-orange-50/40 border-orange-100/50 shadow-sm hover:shadow-md p-8 group">
-            <div className="h-14 w-14 rounded-2xl bg-white text-mc-orange flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 max-w-7xl mx-auto">
+          <GlassCard className="bg-orange-50/40 border-orange-100/50 shadow-sm p-6 flex flex-row md:flex-col items-center gap-4">
+            <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl bg-white text-mc-orange flex items-center justify-center shadow-sm shrink-0">
                <Icons.MapPin />
             </div>
-            <h3 className="text-xl font-bold text-mc-dark mb-3">Encuentra Cerca</h3>
-            <p className="text-base text-gray-500 leading-relaxed">Ubica rápidamente comercios y servicios en tu zona.</p>
+            <div className="text-left md:text-center">
+               <h3 className="text-base font-bold text-mc-dark">Cerca de ti</h3>
+               <p className="text-xs text-gray-500">Comercios en tu zona.</p>
+            </div>
           </GlassCard>
 
-          <GlassCard className="bg-blue-50/40 border-blue-100/50 shadow-sm hover:shadow-md p-8 group">
-            <div className="h-14 w-14 rounded-2xl bg-white text-blue-500 flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform">
+          <GlassCard className="bg-blue-50/40 border-blue-100/50 shadow-sm p-6 flex flex-row md:flex-col items-center gap-4">
+            <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl bg-white text-blue-500 flex items-center justify-center shadow-sm shrink-0">
                <Icons.Rocket />
             </div>
-            <h3 className="text-xl font-bold text-mc-dark mb-3">Impulso Digital</h3>
-            <p className="text-base text-gray-500 leading-relaxed">Visibilidad profesional con perfil, fotos y WhatsApp.</p>
+            <div className="text-left md:text-center">
+               <h3 className="text-base font-bold text-mc-dark">Digital</h3>
+               <p className="text-xs text-gray-500">Tu negocio online.</p>
+            </div>
           </GlassCard>
 
-          <GlassCard className="bg-green-50/40 border-green-100/50 shadow-sm hover:shadow-md p-8 group">
-            <div className="h-14 w-14 rounded-2xl bg-white text-green-500 flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform">
+          <GlassCard className="bg-green-50/40 border-green-100/50 shadow-sm p-6 flex flex-row md:flex-col items-center gap-4">
+            <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl bg-white text-green-500 flex items-center justify-center shadow-sm shrink-0">
                <Icons.Handshake />
             </div>
-            <h3 className="text-xl font-bold text-mc-dark mb-3">Comunidad</h3>
-            <p className="text-base text-gray-500 leading-relaxed">Conectamos vecinos con emprendedores locales.</p>
+            <div className="text-left md:text-center">
+               <h3 className="text-base font-bold text-mc-dark">Comunidad</h3>
+               <p className="text-xs text-gray-500">Apoyo local real.</p>
+            </div>
           </GlassCard>
-
         </div>
       </section>
     </div>
