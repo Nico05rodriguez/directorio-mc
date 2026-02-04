@@ -14,29 +14,25 @@ export const BusinessCard = ({ business }: Props) => {
     >
       {/* 1. IMAGEN (La clave de lo inmersivo) */}
       <div className="relative w-full">
-        {/* TRUCO VISUAL: 
-           aspect-[4/3] en móvil (Foto alta, se ve enorme y bonito)
-           md:aspect-video en PC (Formato cine, para que no quede gigante)
-        */}
         <div className="aspect-[4/3] md:aspect-video relative overflow-hidden">
           <Image
-            src={business.image || "/placeholder-business.jpg"} // Fallback por si no hay foto
-            alt={business.name}
+            src={business.portada_url || "/placeholder-business.jpg"} // CORREGIDO: image -> portada_url
+            alt={business.nombre} // CORREGIDO: name -> nombre
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           
-          {/* Degradado oscuro abajo para que el texto blanco se lea siempre (Estilo TikTok/Reels) */}
+          {/* Degradado oscuro abajo */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300" />
         </div>
 
-        {/* Badge de Categoría (Flotante) */}
+        {/* Badge de Categoría */}
         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-mc-dark shadow-sm z-10">
-          {business.category}
+          {business.categoria} {/* CORREGIDO: category -> categoria */}
         </div>
         
-        {/* Logo del negocio (Círculo flotante superpuesto) */}
+        {/* Logo del negocio */}
         {business.logo_url && (
            <div className="absolute -bottom-6 left-4 md:left-6 w-12 h-12 md:w-14 md:h-14 rounded-full border-4 border-white bg-white overflow-hidden shadow-md z-20">
              <Image 
@@ -50,13 +46,13 @@ export const BusinessCard = ({ business }: Props) => {
         )}
       </div>
 
-      {/* 2. CONTENIDO (Debajo de la foto) */}
+      {/* 2. CONTENIDO */}
       <div className="pt-8 pb-5 px-5 md:px-6">
         <div className="flex flex-col gap-1">
           {/* Título y Verificado */}
           <div className="flex items-center gap-1">
             <h3 className="text-lg md:text-xl font-bold text-mc-dark leading-tight group-hover:text-mc-orange transition-colors">
-              {business.name}
+              {business.nombre} {/* CORREGIDO: name -> nombre */}
             </h3>
             {business.verified && (
               <span className="text-blue-500 text-sm" title="Verificado">
@@ -71,14 +67,14 @@ export const BusinessCard = ({ business }: Props) => {
           </p>
         </div>
 
-        {/* 3. BOTÓN DE ACCIÓN (Call to Action) */}
+        {/* 3. BOTÓN DE ACCIÓN */}
         <div className="mt-4 flex items-center justify-between pt-4 border-t border-gray-50">
-          {/* Teléfono (Solo visible si existe) */}
+          {/* Teléfono */}
           <div className="flex items-center gap-2 text-xs font-medium text-gray-400">
-             {business.phone ? (
+             {business.telefono ? ( // CORREGIDO: phone -> telefono
                <>
                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                 {business.phone}
+                 {business.telefono}
                </>
              ) : (
                <span>Ver detalles</span>
