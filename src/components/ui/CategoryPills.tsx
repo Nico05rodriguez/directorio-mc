@@ -3,14 +3,10 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-// --- ICONOS SVG ACTUALIZADOS ---
+// --- ICONOS SVG ---
 const Icons = {
-  // NUEVO: Icono de "Grid/Cuadrícula" para 'Todas'
   Grid: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>,
-  
-  // NUEVO: Icono de Hamburguesa mejorado
   Burger: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 13.87A8 8 0 0 1 6 10a6 6 0 0 1 12 0 8 8 0 0 1 0 3.87"/><path d="M6 13.87V16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-2.13"/><line x1="6" x2="18" y1="13.87" y2="13.87"/></svg>,
-
   Service: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>,
   Health: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>,
   Clothes: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>,
@@ -35,19 +31,19 @@ export const CategoryPills = () => {
 
   return (
     <div className="w-full mb-8">
-      <div className="flex gap-4 overflow-x-auto px-4 pb-4 snap-x scrollbar-hide md:justify-center">
+      {/* CORRECCIÓN: Usamos 'py-4' (padding vertical) para dar espacio arriba y abajo */}
+      <div className="flex gap-4 overflow-x-auto px-4 py-4 snap-x scrollbar-hide md:justify-center">
         
-        {/* Opción "Todas" - AHORA CON ICONO GRID Y REDONDO */}
+        {/* Opción "Todas" */}
         <Link
             href="/directorio"
             className="flex flex-col items-center gap-2 min-w-[70px] snap-center group"
           >
             <div className={`w-16 h-16 rounded-full flex items-center justify-center text-xl shadow-sm transition-all duration-300 border ${
               !currentCategory 
-                ? "bg-mc-dark text-white border-mc-dark scale-105" 
+                ? "bg-mc-dark text-white border-mc-dark scale-105 shadow-md" 
                 : "bg-gray-50 text-gray-400 border-gray-100 group-hover:bg-gray-100"
             }`}>
-              {/* Aquí usamos el icono Grid en lugar de texto */}
               <Icons.Grid />
             </div>
             <span className={`text-xs font-medium transition-colors ${!currentCategory ? "text-mc-dark font-bold" : "text-gray-500"}`}>
@@ -55,7 +51,7 @@ export const CategoryPills = () => {
             </span>
         </Link>
 
-        {/* Resto de Categorías - AHORA REDONDAS */}
+        {/* Resto de Categorías */}
         {categories.map((cat) => {
           const isActive = currentCategory === cat.slug;
           return (
@@ -66,7 +62,7 @@ export const CategoryPills = () => {
             >
               <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-sm transition-all duration-300 border ${
                 isActive 
-                  ? "bg-orange-50 text-mc-orange border-mc-orange scale-105" 
+                  ? "bg-orange-50 text-mc-orange border-mc-orange scale-105 shadow-md" 
                   : "bg-gray-50 text-gray-500 border-gray-100 group-hover:bg-orange-50 group-hover:border-orange-100 group-hover:text-mc-orange"
               }`}>
                 <cat.icon />
